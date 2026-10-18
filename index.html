@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MatteMästaren</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,6 +13,12 @@
             background-color: #f0f9ff;
             background-image: radial-gradient(#bae6fd 2px, transparent 2px);
             background-size: 30px 30px;
+        }
+
+        /* iOS Safari touch fixes */
+        button, label, select, input {
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -98,7 +104,6 @@
         
         <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
             
-            <!-- EXTREMT TYDLIG RULLMENY HÖGST UPP -->
             <div class="mb-8 bg-sky-50 p-4 rounded-2xl border-4 border-sky-200 shadow-sm">
                 <h2 class="font-black text-sky-900 mb-2 text-xl uppercase tracking-wide">1. Välj räknesätt:</h2>
                 <select id="operation-select" class="w-full bg-white border-4 border-sky-300 rounded-xl p-3 text-xl font-bold text-sky-800 hover:border-sky-400 focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-100 transition-all cursor-pointer shadow-inner">
@@ -135,10 +140,10 @@
         </div>
 
         <div class="p-5 bg-sky-50 border-t-4 border-sky-100 flex flex-col gap-3">
-            <button id="btn-interactive" class="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white font-black py-4 px-4 rounded-2xl transition shadow-lg transform hover:-translate-y-1 text-xl border-b-8 border-green-700 active:border-b-0 active:translate-y-2">
+            <button id="btn-interactive" onclick="startInteractive(event)" ontouchstart="startInteractive(event)" class="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white font-black py-4 px-4 rounded-2xl transition shadow-lg transform hover:-translate-y-1 text-xl border-b-8 border-green-700 active:border-b-0 active:translate-y-2">
                 🎮 Spela på skärmen
             </button>
-            <button id="btn-print-layout" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-2xl transition shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 mt-2">
+            <button id="btn-print-layout" onclick="startPrintLayout(event)" ontouchstart="startPrintLayout(event)" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-2xl transition shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 mt-2">
                 📄 Skapa övningsblad
             </button>
         </div>
@@ -146,25 +151,23 @@
 
     <main class="flex-1 overflow-y-auto relative no-print-bg">
         <div id="action-bar" class="sticky top-0 z-10 p-4 flex justify-center gap-4 bg-white/90 backdrop-blur-md shadow-sm border-b-4 border-slate-100 hidden no-print">
-            <button id="btn-grade" class="hidden bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg text-2xl transform hover:scale-105 transition border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1">
+            <button id="btn-grade" onclick="gradeAnswers(event)" ontouchstart="gradeAnswers(event)" class="hidden bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg text-2xl transform hover:scale-105 transition border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1">
                 ✨ RÄTTA MINA SVAR ✨
             </button>
-            <button id="btn-do-print" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full shadow-lg text-xl transform hover:scale-105 transition">
+            <button id="btn-do-print" onclick="doPrint(event)" ontouchstart="doPrint(event)" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full shadow-lg text-xl transform hover:scale-105 transition">
                 🖨️ Skriv ut nu
             </button>
         </div>
 
         <div class="p-4 md:p-8 flex justify-center pb-32">
-            <!-- Interaktiv Yta -->
             <div id="interactive-container" class="w-full max-w-6xl hidden flex-col items-center">
                 <div id="interactive-ordered" class="w-full flex flex-wrap justify-center gap-6 mb-8 collapse-container"></div>
-                <button id="btn-unhide-ordered" class="hidden bg-sky-100 hover:bg-sky-200 text-sky-800 font-black py-4 px-8 rounded-2xl border-4 border-sky-300 shadow-sm transition-all mb-8 pop-in text-lg flex items-center gap-3">
+                <button id="btn-unhide-ordered" onclick="unhideOrdered(event)" ontouchstart="unhideOrdered(event)" class="hidden bg-sky-100 hover:bg-sky-200 text-sky-800 font-black py-4 px-8 rounded-2xl border-4 border-sky-300 shadow-sm transition-all mb-8 pop-in text-lg flex items-center gap-3">
                     <span class="text-2xl">👀</span> Visa tabellerna i ordning igen!
                 </button>
                 <div id="interactive-mixed" class="w-full flex flex-wrap justify-center gap-6 mt-4"></div>
             </div>
 
-            <!-- Utskriftsyta -->
             <div id="print-container" class="print-area bg-white shadow-2xl w-full max-w-[210mm] min-h-[297mm] p-10 hidden mx-auto"></div>
             
             <div id="empty-state" class="text-center mt-24 no-print flex flex-col items-center slide-up">
@@ -180,13 +183,16 @@
             <div id="result-emoji" class="text-9xl mb-6 pop-in" style="animation-delay: 0.2s;">🌟</div>
             <h2 id="result-title" class="text-4xl font-black text-slate-800 mb-3">Snyggt jobbat!</h2>
             <p id="result-text" class="text-2xl text-slate-600 font-bold mb-8">Du fick <span id="score-correct" class="text-emerald-500 text-3xl font-black">0</span> av <span id="score-total">0</span> rätt!</p>
-            <button id="btn-close-modal" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-black py-4 px-6 rounded-2xl w-full transition text-xl border-b-4 border-indigo-300 active:border-b-0 active:translate-y-1">
+            <button id="btn-close-modal" onclick="closeModal(event)" ontouchstart="closeModal(event)" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-black py-4 px-6 rounded-2xl w-full transition text-xl border-b-4 border-indigo-300 active:border-b-0 active:translate-y-1">
                 Stäng och se svaren
             </button>
         </div>
     </div>
 
     <script>
+        // Global fix för Safari touch-lyssnare
+        document.addEventListener("touchstart", function() {}, {passive: true});
+
         const colorThemes = [
             { bg: 'bg-red-50', text: 'text-red-600', ring: 'focus:ring-red-400', border: 'border-red-200' },
             { bg: 'bg-orange-50', text: 'text-orange-600', ring: 'focus:ring-orange-400', border: 'border-orange-200' },
@@ -206,8 +212,8 @@
             const label = document.createElement('label');
             label.className = `flex items-center space-x-3 cursor-pointer p-3 rounded-2xl transition border-4 border-slate-100 hover:${theme.border} hover:${theme.bg} bg-white shadow-sm`;
             label.innerHTML = `
-                <input type="checkbox" value="${i}" class="table-cb w-6 h-6 rounded border-slate-300 ${theme.text} ${theme.ring} focus:ring-2">
-                <span class="text-slate-700 font-bold text-lg">Tal ${i}</span>
+                <input type="checkbox" value="\${i}" class="table-cb w-6 h-6 rounded border-slate-300 ${theme.text}${theme.ring} focus:ring-2">
+                <span class="text-slate-700 font-bold text-lg">Tal \${i}</span>
             `;
             checkboxContainer.appendChild(label);
         }
@@ -247,18 +253,15 @@
                     if (opSelect === 'add') {
                         a = base; b = i; ans = a + b;
                     } else if (opSelect === 'sub') {
-                        // (base+i) - base = i  (no negative results)
                         b = base; ans = i; a = b + ans; 
                     } else if (opSelect === 'mul') {
                         a = base; b = i; ans = a * b;
                     } else if (opSelect === 'div') {
-                        // (base*i) / base = i (no decimals)
                         b = base; ans = i; a = b * ans;
                     }
                     
                     problems.push({ a, b, ans, op: opSymbol });
                     
-                    // Add to mixed pool with random flipping for + and *
                     const flip = (opSelect === 'add' || opSelect === 'mul') ? Math.random() > 0.5 : false;
                     allMixed.push({ 
                         a: flip ? b : a, 
@@ -268,7 +271,7 @@
                     });
                 }
                 if(includeOrdered) {
-                    orderedBoxes.push({ title: `Tabell ${base}`, problems, color: colorThemes[base-1] });
+                    orderedBoxes.push({ title: `Tabell \${base}`, problems, color: colorThemes[base-1] });
                 }
             });
 
@@ -277,7 +280,7 @@
                 allMixed = shuffleArray(allMixed);
                 for (let i = 0; i < allMixed.length; i += 10) {
                     mixedBoxes.push({ 
-                        title: `Blandade tal (${(i/10)+1})`, 
+                        title: `Blandade tal (\${(i/10)+1})`, 
                         problems: allMixed.slice(i, i + 10), 
                         color: { bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200' } 
                     });
@@ -289,8 +292,8 @@
 
         function buildBoxHTML(box, isInteractive) {
             let html = `
-                <div class="bg-white p-6 rounded-3xl border-4 ${box.color.border} shadow-xl w-full md:w-[380px] ${isInteractive ? 'slide-up' : 'avoid-break h-full flex flex-col'}">
-                    <h2 class="text-2xl font-black text-center ${box.color.text} mb-6 uppercase tracking-wider ${box.color.bg} rounded-xl py-3">${box.title}</h2>
+                <div class="bg-white p-6 rounded-3xl border-4 ${box.color.border} shadow-xl w-full md:w-[380px]${isInteractive ? 'slide-up' : 'avoid-break h-full flex flex-col'}">
+                    <h2 class="text-2xl font-black text-center ${box.color.text} mb-6 uppercase tracking-wider${box.color.bg} rounded-xl py-3">\${box.title}</h2>
                     <div class="flex flex-col space-y-3 flex-grow justify-around">
             `;
             
@@ -306,14 +309,13 @@
                 }
 
                 if (isInteractive) {
-                    // white-space: nowrap prevents line breaks inside the math expression
                     html += `
                         <div class="flex flex-col relative group">
                             <div class="input-row flex flex-nowrap justify-between items-center text-2xl font-bold font-mono text-slate-700 bg-slate-50 p-2 rounded-2xl border-2 border-slate-100 hover:border-slate-300 transition-colors z-10 relative overflow-hidden gap-1">
-                                <span class="whitespace-nowrap flex-shrink-0 text-right pr-2 min-w-[100px]">${p.a} ${p.op} ${p.b} =</span>
+                                <span class="whitespace-nowrap flex-shrink-0 text-right pr-2 min-w-[100px]">\${p.a} ${p.op}${p.b} =</span>
                                 <div class="flex flex-nowrap items-center gap-2 flex-shrink-0">
-                                    <button type="button" class="tip-btn no-print bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold rounded-xl text-lg border-2 border-amber-300 shadow-sm transition-transform active:scale-95 flex items-center justify-center h-12 w-12" data-a="${p.a}" data-b="${p.b}" data-ans="${p.ans}" data-op="${p.op}" title="Visa tips">💡</button>
-                                    <input type="number" data-answer="${p.ans}" class="math-input w-20 h-14 text-center font-black text-3xl bg-white border-4 border-slate-200 rounded-xl focus:border-sky-400 focus:outline-none focus:ring-4 focus:ring-sky-100 transition-all text-sky-900 shadow-inner">
+                                    <button type="button" class="tip-btn no-print bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold rounded-xl text-lg border-2 border-amber-300 shadow-sm transition-transform active:scale-95 flex items-center justify-center h-12 w-12" onclick="handleTipClick(event, this)" ontouchstart="handleTipClick(event, this)" data-a="${p.a}" data-b="${p.b}" data-ans="${p.ans}" data-op="${p.op}" title="Visa tips">💡</button>
+                                    <input type="number" data-answer="\${p.ans}" onfocus="handleInputFocus(event)" ontouchstart="handleInputFocus(event)" class="math-input w-20 h-14 text-center font-black text-3xl bg-white border-4 border-slate-200 rounded-xl focus:border-sky-400 focus:outline-none focus:ring-4 focus:ring-sky-100 transition-all text-sky-900 shadow-inner">
                                 </div>
                             </div>
                             <div class="tip-container hidden bg-amber-50 border-2 border-amber-200 border-t-0 rounded-b-xl p-4 pt-6 -mt-4 text-center text-amber-900 font-bold slide-up no-print relative z-0 flex flex-col gap-2 shadow-inner"></div>
@@ -322,7 +324,7 @@
                 } else {
                     html += `
                         <div class="flex justify-between items-center text-2xl font-bold font-mono text-slate-800 whitespace-nowrap">
-                            <span>${p.a} ${p.op} ${p.b} =</span><span class="answer-line h-6"></span>
+                            <span>\${p.a} ${p.op}${p.b} =</span><span class="answer-line h-6"></span>
                         </div>
                     `;
                 }
@@ -332,7 +334,10 @@
             return html;
         }
 
-        document.getElementById('btn-interactive').addEventListener('click', () => {
+        /* --- Hårdkodade interaktiva funktioner för iOS --- */
+
+        function startInteractive(e) {
+            if(e && e.type === 'touchstart' && e.cancelable) e.preventDefault();
             const data = generateProblemData();
             if (!data) return;
 
@@ -366,9 +371,10 @@
                 iMix.style.display = 'flex';
                 data.mixedBoxes.forEach(b => iMix.innerHTML += buildBoxHTML(b, true));
             } else { iMix.style.display = 'none'; }
-        });
+        }
 
-        document.getElementById('btn-print-layout').addEventListener('click', () => {
+        function startPrintLayout(e) {
+            if(e && e.type === 'touchstart' && e.cancelable) e.preventDefault();
             const data = generateProblemData();
             if (!data) return;
 
@@ -394,134 +400,9 @@
                 const isLastPage = (i + 4 >= allBoxes.length);
                 
                 let pageHtml = `
-                    <div class="print-page w-full ${!isLastPage ? 'mb-16 pb-16 print:mb-0 print:pb-0' : ''}">
+                    <div class="print-page w-full \${!isLastPage ? 'mb-16 pb-16 print:mb-0 print:pb-0' : ''}">
                         <div class="flex justify-between items-end border-b-4 border-slate-800 pb-2 mb-8 mt-2">
                             <div><h1 class="text-4xl font-black text-slate-900">MatteMästaren</h1></div>
                             <div class="text-right">
                                 <div class="text-lg text-slate-700 font-bold mb-1">Namn: ______________________</div>
-                                <div class="text-sm text-slate-500">Sida ${pageCount++}</div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-x-12 gap-y-10">
-                `;
-                chunk.forEach(box => pageHtml += buildBoxHTML(box, false));
-                pageHtml += `</div></div>`;
-                htmlContent += pageHtml;
-            }
-            pCont.innerHTML = htmlContent;
-        });
-
-        document.getElementById('interactive-mixed').addEventListener('focusin', (e) => {
-            if (e.target.classList.contains('math-input')) {
-                const iOrd = document.getElementById('interactive-ordered');
-                if (iOrd.innerHTML.trim() !== '' && !iOrd.classList.contains('collapsed')) {
-                    iOrd.classList.add('collapsed');
-                    document.getElementById('btn-unhide-ordered').classList.remove('hidden');
-                }
-            }
-        });
-
-        document.getElementById('btn-unhide-ordered').addEventListener('click', (e) => {
-            document.getElementById('interactive-ordered').classList.remove('collapsed');
-            e.target.classList.add('hidden');
-        });
-
-        document.getElementById('interactive-container').addEventListener('click', (e) => {
-            const btn = e.target.closest('.tip-btn');
-            if (!btn) return;
-            
-            const container = btn.closest('.relative.group');
-            const tipBox = container.querySelector('.tip-container');
-            
-            if (tipBox.classList.contains('hidden')) {
-                const a = parseInt(btn.getAttribute('data-a'));
-                const b = parseInt(btn.getAttribute('data-b'));
-                const ans = parseInt(btn.getAttribute('data-ans'));
-                const op = btn.getAttribute('data-op');
-                
-                let visualHtml = '<div class="flex flex-wrap justify-center items-center gap-2 mt-2">';
-                
-                if (op === '+') {
-                    visualHtml += `
-                        <div class="bg-white rounded-lg px-2 py-1 flex gap-1 shadow-sm text-sky-500 text-xs">${'⭐'.repeat(a)}</div>
-                        <span class="font-black text-slate-400">+</span>
-                        <div class="bg-white rounded-lg px-2 py-1 flex gap-1 shadow-sm text-green-500 text-xs">${'⭐'.repeat(b)}</div>
-                    `;
-                } else if (op === '-') {
-                    visualHtml += `
-                        <div class="bg-white rounded-lg px-3 py-2 flex flex-wrap gap-1 shadow-sm max-w-[200px]">
-                            ${'⭐'.repeat(ans)}
-                            ${'<span class="opacity-30 grayscale">⭐</span>'.repeat(b)}
-                        </div>
-                    `;
-                } else if (op === '×') {
-                    for(let i = 0; i < a; i++) {
-                        visualHtml += `<div class="bg-white rounded-lg px-2 py-1 border-2 border-amber-100 flex items-center shadow-sm text-amber-500 text-xs">${'⭐'.repeat(b)}</div>`;
-                    }
-                } else if (op === '÷') {
-                    for(let i = 0; i < ans; i++) {
-                        visualHtml += `<div class="bg-white rounded-lg px-2 py-1 border-2 border-purple-100 flex items-center shadow-sm text-purple-500 text-xs">${'⭐'.repeat(b)}</div>`;
-                    }
-                }
-                visualHtml += '</div>';
-
-                tipBox.innerHTML = `
-                    <div class="border-t-4 border-amber-300 w-1/3 mx-auto mb-2 rounded-full opacity-50"></div>
-                    <span class="font-mono text-sm text-amber-900 bg-white/80 inline-block px-3 py-1 rounded-xl shadow-sm">Hur tänker vi här?</span>
-                    ${visualHtml}
-                `;
-                tipBox.classList.remove('hidden');
-                btn.classList.add('bg-amber-300', 'scale-95');
-            } else {
-                tipBox.classList.add('hidden');
-                btn.classList.remove('bg-amber-300', 'scale-95');
-            }
-        });
-
-        document.getElementById('btn-grade').addEventListener('click', () => {
-            const inputs = document.querySelectorAll('.math-input');
-            let correct = 0;
-            let total = inputs.length;
-            if(total === 0) return;
-
-            document.getElementById('interactive-ordered').classList.remove('collapsed');
-            document.getElementById('btn-unhide-ordered').classList.add('hidden');
-
-            inputs.forEach(input => {
-                const ans = parseInt(input.value.trim());
-                const correctAns = parseInt(input.getAttribute('data-answer'));
-                const parentRow = input.closest('.input-row');
-
-                input.className = "math-input w-20 h-14 text-center font-black text-3xl bg-white border-4 rounded-xl focus:outline-none transition-all shadow-inner";
-                parentRow.classList.remove('bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-300');
-                
-                if (isNaN(ans) || ans !== correctAns) {
-                    input.classList.add('border-red-500', 'text-red-700', 'bg-red-100');
-                    parentRow.classList.add('bg-red-50', 'border-red-200');
-                } else {
-                    correct++;
-                    input.classList.add('border-green-500', 'text-green-700', 'bg-green-100');
-                    input.disabled = true;
-                    parentRow.classList.add('bg-green-50', 'border-green-300');
-                }
-            });
-
-            document.getElementById('score-correct').innerText = correct;
-            document.getElementById('score-total').innerText = total;
-            document.getElementById('result-modal').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('modal-content').classList.remove('scale-90');
-                document.getElementById('modal-content').classList.add('scale-100');
-            }, 10);
-        });
-
-        document.getElementById('btn-close-modal').addEventListener('click', () => {
-            document.getElementById('modal-content').classList.remove('scale-100');
-            document.getElementById('modal-content').classList.add('scale-90');
-            setTimeout(() => document.getElementById('result-modal').classList.add('hidden'), 300);
-        });
-
-        document.getElementById('btn-do-print').addEventListener('click', () => window.print());
-    </script>
-</body>
-</html>
+                                <div class="text-sm text-slate-500">Sida \${
